@@ -2,7 +2,7 @@ package Classifier;
 use strict;
 use warnings;
 use Classifier::Util;
-
+use Storable qw/nstore retrieve/;
 
 sub new {
     my $class = shift;
@@ -14,20 +14,6 @@ sub new {
 sub set_filter {
     my ($self, $filter) = @_;
     $self->{filter} = $filter;
-}
- 
-sub load_filter {
-    my ($self, $handle) = @_;
-
-    if ($handle) {
-	if (ref($handle) eq 'DBI::db') {
-	    require('Classifier/Filter/DBI.pm');
-	    $self->{filter} = Classifier::Filter::DBI->new(dbh => $handle);
-	}
-    } else {
-	require('Classifier/Filter/Memory.pm');
-	$self->{filter} = Classifier::Filter::Memory->new();
-    }
 }
 
 sub train {
@@ -70,6 +56,17 @@ sub score {
 	$doc_prob += log($self->term_prob($term, $cat) || $not_likely) * $count;
     }
     return $cat_prob + $doc_prob;
+}
+
+sub save_filter {
+    my ($self, $path) = @_;
+    my $data = $self->{filter};
+    nstore $data, $path;
+}
+
+sub load_filter {
+    my ($self, $path) = @_;
+    $self->{filter} = retrieve $path;
 }
 
 1;

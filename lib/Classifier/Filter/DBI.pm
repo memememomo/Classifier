@@ -127,7 +127,7 @@ sub _update_category_count {
     if ($count_cat) {
 	$count_cat += 1;
 	my $update = $dbh->prepare("UPDATE category_count SET count = ? WHERE category = ?");
-	$update->execute($cat, $count_cat);
+	$update->execute($count_cat, $cat);
 	$update->finish;
 	undef $update;
     } else {
